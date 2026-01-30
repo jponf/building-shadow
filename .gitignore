@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff
+.ruff_cache/
+
+# Cache
+.cache/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Environment variables
+.env
+.env.local
+
+# Models cache (Hugging Face)
+.cache/huggingface/
+
+# Streamlit
+.streamlit/
+
+# OS
+Thumbs.db
+
+# Mise
+mise.toml
+.mise.toml
+
+# Models artifacts
+models/
+tensorboard/
+
+# Data & Temp
+cache/
+data/*/raw
+tmp/
+temp/
+
+# Generated output files
+building_shadows.html
+*.html
+!docs/**/*.html
+
+# Claude
+.claude/

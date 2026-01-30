@@ -1,0 +1,42 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.2.0
+    hooks:
+      - id: add-trailing-comma
+
+  # Local hooks using uv
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff linter
+        stages: [pre-commit]
+        language: system
+        entry: uv run ruff check --fix
+        types: [python]
+
+      - id: ruff-format
+        name: Ruff formatter
+        stages: [pre-commit]
+        language: system
+        entry: uv run ruff format
+        types: [python]
+
+      - id: mypy
+        name: Mypy type checker
+        stages: [pre-commit]
+        language: system
+        entry: uv run mypy
+        types: [python]
+        pass_filenames: false
+        args: [src/]
