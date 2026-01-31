@@ -1,9 +1,13 @@
 """Data models for building shadow computation."""
 
+import json
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Annotated, Literal
 
 import geopandas as gpd
+from pydantic import BaseModel, Field, TypeAdapter, field_validator
 
 
 class Season(str, Enum):
@@ -59,6 +63,79 @@ class BuildingData:
             f"BuildingData(source={self.source.value}, "
             f"count={self.count}, radius={self.radius_meters}m)"
         )
+
+
+# Custom building models for user-defined shapes
+
+# Coordinate bounds
+MIN_LAT, MAX_LAT = -90.0, 90.0
+MIN_LON, MAX_LON = -180.0, 180.0
+
+
+class PolygonBuilding(BaseModel):
+    """A polygon building defined by corner coordinates."""
+
+    shape: Literal["polygon"]
+    corners: list[tuple[float, float]] = Field(
+        ...,
+        min_length=3,
+        description="List of [lat, lon] coordinate pairs defining vertices",
+    )
+    height: float = Field(..., gt=0, description="Building height in meters")
+
+    @field_validator("corners")
+    @classmethod
+    def validate_corners(
+        cls,
+        v: list[tuple[float, float]],
+    ) -> list[tuple[float, float]]:
+        """Validate that corners form a valid polygon."""
+        for lat, lon in v:
+            if not MIN_LAT <= lat <= MAX_LAT:
+                msg = f"Latitude must be between {MIN_LAT} and {MAX_LAT}, got {lat}"
+                raise ValueError(msg)
+            if not MIN_LON <= lon <= MAX_LON:
+                msg = f"Longitude must be between {MIN_LON} and {MAX_LON}, got {lon}"
+                raise ValueError(msg)
+        return v
+
+
+class CylinderBuilding(BaseModel):
+    """A cylindrical building defined by center and radius."""
+
+    shape: Literal["cylinder"]
+    lat: float = Field(..., ge=MIN_LAT, le=MAX_LAT, description="Center latitude")
+    lon: float = Field(..., ge=MIN_LON, le=MAX_LON, description="Center longitude")
+    radius: float = Field(..., gt=0, description="Radius in meters")
+    height: float = Field(..., gt=0, description="Building height in meters")
+
+
+CustomBuilding = Annotated[
+    PolygonBuilding | CylinderBuilding,
+    Field(discriminator="shape"),
+]
+
+
+def parse_custom_buildings(json_path: Path) -> list[PolygonBuilding | CylinderBuilding]:
+    """Parse custom buildings from a JSON file.
+
+    Args:
+        json_path: Path to JSON file containing building definitions.
+
+    Returns:
+        List of validated custom building objects.
+
+    Raises:
+        ValueError: If JSON is invalid or buildings fail validation.
+        FileNotFoundError: If the JSON file doesn't exist.
+    """
+    with json_path.open() as f:
+        data = json.load(f)
+
+    adapter: TypeAdapter[list[PolygonBuilding | CylinderBuilding]] = TypeAdapter(
+        list[CustomBuilding],
+    )
+    return adapter.validate_python(data)
 
 
 def normalize_buildings(

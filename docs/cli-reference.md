@@ -158,6 +158,48 @@ building-shadow visualize -a "Singapore" -tz Asia/Singapore
 
 ### Building options
 
+#### `--buildings`, `-b`
+
+Path to a JSON file containing custom building definitions. Custom buildings are merged with buildings from the selected data source.
+
+```bash
+# Add custom buildings to OSM data
+building-shadow visualize -a "Location" --buildings custom.json
+
+# Use with coordinates
+building-shadow visualize --lat 40.4168 --lon -3.7038 -b my_buildings.json
+```
+
+The JSON file should contain an array of building definitions:
+
+```json
+[
+  {
+    "shape": "polygon",
+    "corners": [[lat1, lon1], [lat2, lon2], [lat3, lon3], [lat4, lon4]],
+    "height": 25
+  },
+  {
+    "shape": "cylinder",
+    "lat": 40.417,
+    "lon": -3.703,
+    "radius": 10,
+    "height": 20
+  }
+]
+```
+
+**Polygon buildings:**
+- `shape`: Must be `"polygon"`
+- `corners`: Array of `[latitude, longitude]` pairs (minimum 3 points)
+- `height`: Building height in meters
+
+**Cylinder buildings:**
+- `shape`: Must be `"cylinder"`
+- `lat`, `lon`: Center coordinates
+- `radius`: Radius in meters
+- `height`: Building height in meters
+
 #### `--default-height`
 
 Default building height in meters when not available from data source. Default: `15`
@@ -217,6 +259,27 @@ building-shadow visualize -a "Plaza Mayor, Madrid" --source catastro -o madrid_c
 
 # Use Overture for areas with sparse OSM coverage
 building-shadow visualize -a "Suburban Phoenix, AZ" --source overture -tz America/Phoenix
+```
+
+### Adding custom buildings
+
+```bash
+# Add planned buildings to existing area
+building-shadow visualize -a "Empty lot, City" --buildings planned_development.json
+
+# Simulate a new building's shadow impact
+building-shadow visualize --lat 40.4168 --lon -3.7038 -r 200 -b new_tower.json -o impact_study.html
+```
+
+Example `planned_development.json`:
+```json
+[
+  {
+    "shape": "polygon",
+    "corners": [[40.4168, -3.7038], [40.4168, -3.7035], [40.4165, -3.7035], [40.4165, -3.7038]],
+    "height": 50
+  }
+]
 ```
 
 ### Different seasons comparison

@@ -9,6 +9,7 @@ Building Shadow supports multiple data sources for building footprints. Each sou
 | `osm` | Worldwide | None (default) | General use, worldwide locations |
 | `overture` | Worldwide | DuckDB package | ML-enhanced footprints |
 | `catastro` | Spain only | None | Official Spanish building data |
+| Custom JSON | User-defined | `--buildings` flag | Planning, simulation, custom shapes |
 
 ### Checking availability
 
@@ -161,16 +162,129 @@ As official government data, Catastro provides:
 | 2 | `numberOfFloors` | floors × 3m |
 | 3 | Default | `--default-height` value |
 
+## Custom Buildings (JSON)
+
+User-defined buildings for planning, simulation, or adding shapes not in existing data sources.
+
+### Usage
+
+```bash
+building-shadow visualize -a "Location" --buildings custom.json
+building-shadow visualize --lat 40.4168 --lon -3.7038 -b planned_buildings.json
+```
+
+Custom buildings are **merged** with buildings from the selected data source (OSM, Overture, or Catastro).
+
+### JSON format
+
+The JSON file should contain an array of building definitions. Two shape types are supported:
+
+#### Polygon buildings
+
+Define any shape using corner coordinates:
+
+```json
+{
+  "shape": "polygon",
+  "corners": [
+    [40.4168, -3.7038],
+    [40.4168, -3.7035],
+    [40.4165, -3.7035],
+    [40.4165, -3.7038]
+  ],
+  "height": 25
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `shape` | string | Must be `"polygon"` |
+| `corners` | array | List of `[latitude, longitude]` pairs (min 3 points) |
+| `height` | number | Building height in meters (> 0) |
+
+#### Cylinder buildings
+
+Define circular buildings (towers, silos, etc.):
+
+```json
+{
+  "shape": "cylinder",
+  "lat": 40.417,
+  "lon": -3.703,
+  "radius": 10,
+  "height": 50
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `shape` | string | Must be `"cylinder"` |
+| `lat` | number | Center latitude (-90 to 90) |
+| `lon` | number | Center longitude (-180 to 180) |
+| `radius` | number | Radius in meters (> 0) |
+| `height` | number | Building height in meters (> 0) |
+
+### Complete example
+
+```json
+[
+  {
+    "shape": "polygon",
+    "corners": [
+      [40.4168, -3.7038],
+      [40.4168, -3.7032],
+      [40.4162, -3.7032],
+      [40.4162, -3.7038]
+    ],
+    "height": 45
+  },
+  {
+    "shape": "cylinder",
+    "lat": 40.4175,
+    "lon": -3.7025,
+    "radius": 8,
+    "height": 60
+  },
+  {
+    "shape": "polygon",
+    "corners": [
+      [40.4155, -3.7040],
+      [40.4155, -3.7035],
+      [40.4150, -3.7037]
+    ],
+    "height": 20
+  }
+]
+```
+
+### Use cases
+
+- **Urban planning**: Visualize shadow impact of proposed developments
+- **Architecture**: Study how a new building affects surrounding areas
+- **Solar analysis**: Identify areas that would lose sunlight
+- **Simulation**: Model hypothetical building scenarios
+- **Missing data**: Add buildings not present in OSM/Overture/Catastro
+
+### Validation
+
+The JSON is validated using [Pydantic](https://docs.pydantic.dev/). Invalid files will produce clear error messages:
+
+```
+Error parsing custom buildings: 1 validation error for list[...]
+0.corners
+  List should have at least 3 items after validation, not 2
+```
+
 ## Comparison
 
-| Aspect | OSM | Overture | Catastro |
-|--------|-----|----------|----------|
-| Coverage | Worldwide | Worldwide | Spain only |
-| Updates | Continuous | Periodic releases | Official updates |
-| Height data | Variable | ML-enhanced | Floor counts |
-| Accuracy | Community-dependent | ML-processed | Surveyed |
-| Dependencies | osmnx | duckdb | requests |
-| Speed | Fast | Slower (S3 query) | Medium |
+| Aspect | OSM | Overture | Catastro | Custom JSON |
+|--------|-----|----------|----------|-------------|
+| Coverage | Worldwide | Worldwide | Spain only | User-defined |
+| Updates | Continuous | Periodic releases | Official updates | Manual |
+| Height data | Variable | ML-enhanced | Floor counts | User-specified |
+| Accuracy | Community-dependent | ML-processed | Surveyed | User-controlled |
+| Dependencies | osmnx | duckdb | requests | pydantic |
+| Speed | Fast | Slower (S3 query) | Medium | Instant |
 
 ## Choosing a source
 

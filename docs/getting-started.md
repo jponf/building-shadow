@@ -145,6 +145,35 @@ Check available sources on your system:
 building-shadow sources
 ```
 
+### Custom buildings
+
+Add user-defined buildings for planning or simulation:
+
+```bash
+building-shadow visualize -a "Location" --buildings custom.json
+```
+
+Create a JSON file with building definitions:
+
+```json
+[
+  {
+    "shape": "polygon",
+    "corners": [[40.4168, -3.7038], [40.4168, -3.7035], [40.4165, -3.7035], [40.4165, -3.7038]],
+    "height": 30
+  },
+  {
+    "shape": "cylinder",
+    "lat": 40.417,
+    "lon": -3.703,
+    "radius": 10,
+    "height": 25
+  }
+]
+```
+
+Custom buildings are merged with buildings from the selected data source, making it easy to see how a proposed building might affect shadows in an existing area.
+
 ## Running as a Python module
 
 You can also run the tool as a Python module:
