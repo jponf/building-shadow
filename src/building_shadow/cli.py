@@ -26,7 +26,7 @@ app = typer.Typer(
 
 
 @app.command()
-def visualize(  # noqa: PLR0913
+def visualize(  # noqa: PLR0913, PLR0912, PLR0915
     address: Annotated[
         str | None,
         typer.Option(
@@ -110,6 +110,14 @@ def visualize(  # noqa: PLR0913
             help="Default building height in meters when not available.",
         ),
     ] = DEFAULT_BUILDING_HEIGHT,
+    buildings_file: Annotated[
+        Path | None,
+        typer.Option(
+            "--buildings",
+            "-b",
+            help="JSON file with custom building definitions to add.",
+        ),
+    ] = None,
     output: Annotated[
         Path,
         typer.Option(
@@ -128,10 +136,15 @@ def visualize(  # noqa: PLR0913
         overture - Overture Maps (requires duckdb)
         catastro - Spanish Cadastre (Spain only)
 
+    Custom buildings:
+        Use --buildings to add user-defined buildings from a JSON file.
+        Custom buildings are merged with data from the selected source.
+
     Examples:
         building-shadow visualize --address "Plaza Mayor, Madrid, Spain"
         building-shadow visualize --lat 40.4168 --lon -3.7038 --season winter
         building-shadow visualize -a "Madrid" --source catastro
+        building-shadow visualize --lat 40.4168 --lon -3.7038 -b custom.json
     """
     if address is None and (latitude is None or longitude is None):
         typer.echo(
@@ -173,7 +186,7 @@ def visualize(  # noqa: PLR0913
             default_height=default_height,
             source=source,
         )
-        typer.echo(f"Found {len(buildings)} buildings")
+        typer.echo(f"Found {len(buildings)} buildings from {source.value}")
     except ImportError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1) from e
@@ -183,6 +196,34 @@ def visualize(  # noqa: PLR0913
     except ConnectionError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1) from e
+
+    # Merge custom buildings if provided
+    if buildings_file is not None:
+        typer.echo(f"Loading custom buildings from {buildings_file}...")
+        try:
+            import geopandas as gpd  # noqa: PLC0415
+            import pandas as pd  # noqa: PLC0415
+
+            from building_shadow.custom_buildings import (  # noqa: PLC0415
+                load_custom_buildings,
+            )
+
+            custom_gdf = load_custom_buildings(buildings_file)
+            typer.echo(f"Loaded {len(custom_gdf)} custom buildings")
+
+            # Merge with existing buildings
+            buildings = gpd.GeoDataFrame(
+                pd.concat([buildings, custom_gdf], ignore_index=True),
+                crs="EPSG:4326",
+            )
+            buildings["building_id"] = range(len(buildings))
+            typer.echo(f"Total buildings after merge: {len(buildings)}")
+        except FileNotFoundError:
+            typer.echo(f"Error: Buildings file not found: {buildings_file}", err=True)
+            raise typer.Exit(code=1) from None
+        except ValueError as e:
+            typer.echo(f"Error parsing custom buildings: {e}", err=True)
+            raise typer.Exit(code=1) from e
 
     typer.echo(f"Computing shadows ({season.value}, {start_hour}:00-{end_hour}:00)...")
     try:

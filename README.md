@@ -7,6 +7,7 @@ Visualize how buildings cast shadows throughout the day using real building data
 ## Features
 
 - **Multiple data sources**: OpenStreetMap (worldwide), Overture Maps (ML-generated), Spanish Cadastre (Spain)
+- **Custom buildings**: Add your own building shapes via JSON for planning/simulation
 - Compute shadows based on sun position for any date/time
 - Support for seasonal sun trajectories (spring, summer, autumn, winter)
 - Interactive HTML visualization with layer controls
@@ -67,6 +68,35 @@ The visualization shows buildings (blue) and their shadows at different times of
 building-shadow sources
 ```
 
+## Custom Buildings
+
+Add user-defined buildings via JSON for planning or simulation purposes:
+
+```bash
+building-shadow visualize --lat 40.4168 --lon -3.7038 --buildings custom.json
+```
+
+JSON format supports polygons and cylinders:
+
+```json
+[
+  {
+    "shape": "polygon",
+    "corners": [[40.4168, -3.7038], [40.4168, -3.7035], [40.4165, -3.7035], [40.4165, -3.7038]],
+    "height": 25
+  },
+  {
+    "shape": "cylinder",
+    "lat": 40.417,
+    "lon": -3.703,
+    "radius": 10,
+    "height": 20
+  }
+]
+```
+
+Custom buildings are merged with data from the selected source.
+
 ## Options
 
 | Option | Short | Description | Default |
@@ -76,6 +106,7 @@ building-shadow sources
 | `--longitude` | `--lon` | Longitude coordinate | - |
 | `--radius` | `-r` | Search radius in meters | 300 |
 | `--source` | `-src` | Data source (osm/overture/catastro) | osm |
+| `--buildings` | `-b` | JSON file with custom buildings | - |
 | `--season` | `-s` | Season (spring/summer/autumn/winter) | summer |
 | `--start-hour` | - | Start hour (0-23) | 9 |
 | `--end-hour` | - | End hour (0-23) | 21 |
