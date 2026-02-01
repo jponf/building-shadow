@@ -8,8 +8,8 @@ Visualize how buildings cast shadows throughout the day using real building data
 
 - **Multiple data sources**: OpenStreetMap (worldwide), Overture Maps (ML-generated), Spanish Cadastre (Spain)
 - **Custom buildings**: Add your own building shapes via JSON for planning/simulation
-- Compute shadows based on sun position for any date/time
-- Support for seasonal sun trajectories (spring, summer, autumn, winter)
+- Compute shadows based on sun position for any specific date
+- Configurable date for sun trajectory calculation
 - Interactive HTML visualization with layer controls
 - Automatic height extraction from source data
 
@@ -107,7 +107,7 @@ Custom buildings are merged with data from the selected source.
 | `--radius` | `-r` | Search radius in meters | 300 |
 | `--source` | `-src` | Data source (osm/overture/catastro) | osm |
 | `--buildings` | `-b` | JSON file with custom buildings | - |
-| `--season` | `-s` | Season (spring/summer/autumn/winter) | summer |
+| `--date` | `-d` | Date for sun position (YYYY-MM-DD) | today |
 | `--start-hour` | - | Start hour (0-23) | 9 |
 | `--end-hour` | - | End hour (0-23) | 21 |
 | `--timezone` | `-tz` | Local timezone | Europe/Madrid |

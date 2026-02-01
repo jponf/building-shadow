@@ -52,7 +52,7 @@ building-shadow visualize --address "Empire State Building, New York"
 This will:
 1. Geocode the address to coordinates
 2. Fetch buildings within 300m (default radius)
-3. Compute shadows for summer (default) from 9:00-21:00
+3. Compute shadows for today's date from 9:00-21:00
 4. Save `building_shadows.html` in the current directory
 
 ### Using coordinates
@@ -73,19 +73,22 @@ Open the generated `building_shadows.html` in a web browser. You'll see:
 
 ## Configuration Options
 
-### Season
+### Date
 
-The sun's path varies by season. Choose the appropriate one:
+The sun's path varies by date. Choose any specific date for the calculation:
 
 ```bash
 # Summer solstice (June 21) - highest sun, shortest shadows
-building-shadow visualize -a "Central Park, NY" --season summer
+building-shadow visualize -a "Central Park, NY" --date 2024-06-21
 
 # Winter solstice (December 21) - lowest sun, longest shadows
-building-shadow visualize -a "Central Park, NY" --season winter
+building-shadow visualize -a "Central Park, NY" --date 2024-12-21
 
-# Spring/Autumn equinox - moderate shadows
-building-shadow visualize -a "Central Park, NY" --season spring
+# Any specific date
+building-shadow visualize -a "Central Park, NY" --date 2024-03-15
+
+# Today's date (default when --date is omitted)
+building-shadow visualize -a "Central Park, NY"
 ```
 
 ### Time range

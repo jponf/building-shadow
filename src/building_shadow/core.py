@@ -5,7 +5,7 @@ Building data fetching is handled by the sources package, and
 visualization is handled by the visualization module.
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 import geopandas as gpd
 import pandas as pd
@@ -15,10 +15,8 @@ from geopy.geocoders import Nominatim
 from building_shadow.models import (
     DEFAULT_BUILDING_HEIGHT,
     DEFAULT_RADIUS_METERS,
-    SEASON_DATES,
     WGS84_EPSG,
     DataSource,
-    Season,
 )
 from building_shadow.sources import create_source
 
@@ -83,7 +81,7 @@ def fetch_buildings(
 
 def compute_shadows(
     buildings: gpd.GeoDataFrame,
-    season: Season = Season.SUMMER,
+    target_date: date | None = None,
     start_hour: int = 9,
     end_hour: int = 21,
     timezone: str = "Europe/Madrid",
@@ -92,7 +90,7 @@ def compute_shadows(
 
     Args:
         buildings: GeoDataFrame with building geometries and heights.
-        season: Season for sun position calculation.
+        target_date: Date for sun position calculation (defaults to today).
         start_hour: Start hour for shadow computation (default: 9).
         end_hour: End hour for shadow computation (default: 21).
         timezone: Local timezone for the location.
@@ -100,7 +98,7 @@ def compute_shadows(
     Returns:
         Dictionary mapping hour to shadow GeoDataFrame.
     """
-    date_str = _get_representative_date(season)
+    date_str = _format_date(target_date)
     shadows_by_hour: dict[int, gpd.GeoDataFrame] = {}
 
     for hour in range(start_hour, end_hour + 1):
@@ -120,7 +118,7 @@ def compute_shadows(
 
 def compute_shadow_animation_data(
     buildings: gpd.GeoDataFrame,
-    season: Season = Season.SUMMER,
+    target_date: date | None = None,
     start_hour: int = 9,
     end_hour: int = 21,
     timezone: str = "Europe/Madrid",
@@ -132,7 +130,7 @@ def compute_shadow_animation_data(
 
     Args:
         buildings: GeoDataFrame with building geometries and heights.
-        season: Season for sun position calculation.
+        target_date: Date for sun position calculation (defaults to today).
         start_hour: Start hour for shadow computation (default: 9).
         end_hour: End hour for shadow computation (default: 21).
         timezone: Local timezone for the location.
@@ -143,7 +141,7 @@ def compute_shadow_animation_data(
     Raises:
         ValueError: If no shadows could be computed.
     """
-    date_str = _get_representative_date(season)
+    date_str = _format_date(target_date)
     all_shadows: list[gpd.GeoDataFrame] = []
 
     for hour in range(start_hour, end_hour + 1):
@@ -169,16 +167,15 @@ def compute_shadow_animation_data(
     return combined.set_crs(epsg=WGS84_EPSG)
 
 
-def _get_representative_date(season: Season, year: int | None = None) -> str:
-    """Get a representative date string for the given season.
+def _format_date(target_date: date | None = None) -> str:
+    """Format a date for shadow computation.
 
     Args:
-        season: Season for sun trajectory calculation.
-        year: Year to use (defaults to current year).
+        target_date: Date to use (defaults to today).
 
     Returns:
         Date string in YYYY-MM-DD format.
     """
-    if year is None:
-        year = datetime.now(tz=UTC).year
-    return f"{year}-{SEASON_DATES[season]}"
+    if target_date is None:
+        target_date = datetime.now(tz=UTC).date()
+    return target_date.strftime("%Y-%m-%d")

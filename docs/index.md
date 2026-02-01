@@ -22,7 +22,7 @@ Given a location (address or coordinates), this tool:
 
 - **Multiple data sources**: OpenStreetMap (worldwide), Overture Maps (ML-generated), Spanish Cadastre (Spain)
 - Support for any location worldwide via address or coordinates
-- Seasonal sun trajectory (spring, summer, autumn, winter)
+- Sun trajectory calculation for any specific date
 - Configurable time range (default 9:00-21:00)
 - Interactive HTML visualization with layer controls
 - Automatic height extraction from source data
@@ -38,8 +38,8 @@ Given a location (address or coordinates), this tool:
 ## Quick Example
 
 ```bash
-# Visualize shadows around Madrid's Plaza Mayor in summer (using OSM - default)
-building-shadow visualize --address "Plaza Mayor, Madrid, Spain" --season summer
+# Visualize shadows around Madrid's Plaza Mayor on summer solstice
+building-shadow visualize --address "Plaza Mayor, Madrid, Spain" --date 2024-06-21
 
 # Use Spanish Cadastre for official building data in Spain
 building-shadow visualize --address "Plaza Mayor, Madrid" --source catastro

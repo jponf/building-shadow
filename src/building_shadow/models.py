@@ -10,15 +10,6 @@ import geopandas as gpd
 from pydantic import BaseModel, Field, TypeAdapter, field_validator
 
 
-class Season(str, Enum):
-    """Season enum for sun trajectory selection."""
-
-    SPRING = "spring"
-    SUMMER = "summer"
-    AUTUMN = "autumn"
-    WINTER = "winter"
-
-
 class DataSource(str, Enum):
     """Available data sources for building footprints."""
 
@@ -26,13 +17,6 @@ class DataSource(str, Enum):
     OVERTURE = "overture"
     CATASTRO = "catastro"
 
-
-SEASON_DATES = {
-    Season.SPRING: "03-21",
-    Season.SUMMER: "06-21",
-    Season.AUTUMN: "09-21",
-    Season.WINTER: "12-21",
-}
 
 WGS84_EPSG = 4326
 WEB_MERCATOR_EPSG = 3857

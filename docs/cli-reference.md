@@ -109,15 +109,19 @@ See [Data Sources](data-sources.md) for detailed information about each source.
 
 ### Time options
 
-#### `--season`, `-s`
+#### `--date`, `-d`
 
-Season for sun trajectory calculation. Default: `summer`
-
-Values: `spring`, `summer`, `autumn`, `winter`
+Date for sun position calculation in YYYY-MM-DD format. Default: today's date.
 
 ```bash
-building-shadow visualize -a "Location" --season winter
-building-shadow visualize -a "Location" -s autumn
+# Winter solstice
+building-shadow visualize -a "Location" --date 2024-12-21
+
+# Summer solstice
+building-shadow visualize -a "Location" -d 2024-06-21
+
+# Specific date
+building-shadow visualize -a "Location" --date 2024-03-15
 ```
 
 #### `--start-hour`
@@ -242,7 +246,7 @@ building-shadow visualize \
     --address "Sagrada Familia, Barcelona" \
     --source catastro \
     --radius 400 \
-    --season summer \
+    --date 2024-06-21 \
     --start-hour 8 \
     --end-hour 20 \
     --timezone Europe/Madrid \
@@ -282,16 +286,16 @@ Example `planned_development.json`:
 ]
 ```
 
-### Different seasons comparison
+### Different dates comparison
 
 ```bash
-# Generate shadows for each season
-for season in spring summer autumn winter; do
+# Generate shadows for solstices and equinoxes
+for date in 2024-03-21 2024-06-21 2024-09-21 2024-12-21; do
     building-shadow visualize \
         -a "Central Park, NY" \
-        -s $season \
+        -d $date \
         -tz America/New_York \
-        -o shadows_${season}.html
+        -o shadows_${date}.html
 done
 ```
 

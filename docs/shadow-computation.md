@@ -82,37 +82,39 @@ Example at 30° altitude with 20m building:
 shadow_length = 20 / tan(30°) = 20 / 0.577 ≈ 34.6 meters
 ```
 
-## Seasonal variation
+## Date-based variation
 
-The sun's path varies dramatically by season and latitude:
+The sun's path varies dramatically by date and latitude. You can specify any date to see the shadow patterns for that day.
 
-### Summer (June 21 - Northern Hemisphere)
+### Key dates (Northern Hemisphere)
+
+**Summer solstice (June 21)**
 - Highest sun altitude
 - Longest day
 - Shortest shadows
 - Sun rises in northeast, sets in northwest
 
-### Winter (December 21 - Northern Hemisphere)
+**Winter solstice (December 21)**
 - Lowest sun altitude
 - Shortest day
 - Longest shadows
 - Sun rises in southeast, sets in southwest
 
-### Equinoxes (March 21, September 21)
+**Equinoxes (March 21, September 21)**
 - Sun rises due east, sets due west
 - Day and night approximately equal
 - Moderate shadows
 
-## Representative dates
+## Specifying a date
 
-The tool uses solstice/equinox dates to represent each season:
+The tool accepts any date in YYYY-MM-DD format. If no date is specified, it defaults to today's date.
 
-| Season | Date | Significance |
-|--------|------|--------------|
-| Spring | March 21 | Vernal equinox |
-| Summer | June 21 | Summer solstice |
-| Autumn | September 21 | Autumnal equinox |
-| Winter | December 21 | Winter solstice |
+| Example Date | Significance |
+|--------------|--------------|
+| 2024-03-21 | Vernal equinox |
+| 2024-06-21 | Summer solstice |
+| 2024-09-21 | Autumnal equinox |
+| 2024-12-21 | Winter solstice |
 
 ## Timezone handling
 
@@ -168,8 +170,8 @@ Shadows are computed as if the sun is a point source with no atmosphere scatteri
 For programmatic use, import the core functions:
 
 ```python
+from datetime import date
 from building_shadow import fetch_buildings, compute_shadows
-from building_shadow.core import Season
 
 # Fetch buildings
 buildings = fetch_buildings(
@@ -178,10 +180,10 @@ buildings = fetch_buildings(
     radius_meters=300
 )
 
-# Compute shadows for each hour
+# Compute shadows for each hour on a specific date
 shadows_by_hour = compute_shadows(
     buildings=buildings,
-    season=Season.SUMMER,
+    target_date=date(2024, 6, 21),  # Summer solstice
     start_hour=9,
     end_hour=18,
     timezone="Europe/Madrid"

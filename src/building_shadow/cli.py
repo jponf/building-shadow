@@ -1,5 +1,6 @@
 """Command-line interface for building shadow visualization."""
 
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -14,7 +15,6 @@ from building_shadow.models import (
     DEFAULT_BUILDING_HEIGHT,
     DEFAULT_RADIUS_METERS,
     DataSource,
-    Season,
 )
 from building_shadow.visualization import save_visualization_html
 
@@ -68,15 +68,14 @@ def visualize(  # noqa: PLR0913, PLR0912, PLR0915
             case_sensitive=False,
         ),
     ] = DataSource.OSM,
-    season: Annotated[
-        Season,
+    target_date: Annotated[
+        str | None,
         typer.Option(
-            "--season",
-            "-s",
-            help="Season for sun trajectory calculation.",
-            case_sensitive=False,
+            "--date",
+            "-d",
+            help="Date for sun position (YYYY-MM-DD format, defaults to today).",
         ),
-    ] = Season.SUMMER,
+    ] = None,
     start_hour: Annotated[
         int,
         typer.Option(
@@ -142,7 +141,7 @@ def visualize(  # noqa: PLR0913, PLR0912, PLR0915
 
     Examples:
         building-shadow visualize --address "Plaza Mayor, Madrid, Spain"
-        building-shadow visualize --lat 40.4168 --lon -3.7038 --season winter
+        building-shadow visualize --lat 40.4168 --lon -3.7038 --date 2024-12-21
         building-shadow visualize -a "Madrid" --source catastro
         building-shadow visualize --lat 40.4168 --lon -3.7038 -b custom.json
     """
@@ -225,11 +224,24 @@ def visualize(  # noqa: PLR0913, PLR0912, PLR0915
             typer.echo(f"Error parsing custom buildings: {e}", err=True)
             raise typer.Exit(code=1) from e
 
-    typer.echo(f"Computing shadows ({season.value}, {start_hour}:00-{end_hour}:00)...")
+    # Parse the target date
+    parsed_date: date | None = None
+    if target_date is not None:
+        try:
+            parsed_date = datetime.strptime(target_date, "%Y-%m-%d").date()
+        except ValueError:
+            typer.echo(
+                "Error: Invalid date format. Use YYYY-MM-DD (e.g., 2024-06-21).",
+                err=True,
+            )
+            raise typer.Exit(code=1) from None
+
+    date_display = parsed_date.isoformat() if parsed_date else "today"
+    typer.echo(f"Computing shadows ({date_display}, {start_hour}:00-{end_hour}:00)...")
     try:
         shadows = compute_shadow_animation_data(
             buildings=buildings,
-            season=season,
+            target_date=parsed_date,
             start_hour=start_hour,
             end_hour=end_hour,
             timezone=timezone,
@@ -288,9 +300,7 @@ def info() -> None:
     typer.echo("  - Multiple data sources (OSM, Overture Maps, Spanish Cadastre)")
     typer.echo("  - Compute shadows using pybdshadow (sun position based)")
     typer.echo("  - Interactive visualization with Folium")
-    typer.echo("  - Support for different seasons and time ranges")
-    typer.echo("")
-    typer.echo("Available seasons: spring, summer, autumn, winter")
+    typer.echo("  - Support for any specific date and time range")
     typer.echo("")
     typer.echo("Run 'building-shadow sources' to see available data sources.")
     typer.echo("Run 'building-shadow visualize --help' for usage details.")
